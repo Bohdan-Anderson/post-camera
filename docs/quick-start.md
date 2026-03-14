@@ -54,7 +54,7 @@ See [Vite setup](./vite-setup.md) for a full example.
 
 ## 5. Face snapshots (optional)
 
-To get periodic 128×128 face crops from the video (derived from pose keypoints), enable face snapshots and subscribe:
+To get periodic 128×128 face crops from the video (derived from pose keypoints), enable face snapshots and subscribe. The image preserves the face crop’s aspect ratio and may have transparent areas when the crop is not square.
 
 ```js
 await camera.init({

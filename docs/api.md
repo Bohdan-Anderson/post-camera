@@ -58,7 +58,7 @@ const unsubscribe = camera.onFrame((users, options) => {
 
 Subscribe to live face snapshots. Only emits when **face snapshots are enabled** (via `init({ faceSnapshots: { enabled: true } })` or `setFaceSnapshotOptions({ enabled: true })`). Returns an unsubscribe function.
 
-Faces are derived from pose keypoints (nose, eyes, ears): the library crops that region from the video frame and resizes it to **128×128**. You receive an array of snapshots, one per detected user, at the configured interval.
+Faces are derived from pose keypoints (nose, eyes, ears): the library crops that region from the video frame and fits it into **128×128** with aspect ratio preserved (no stretch). You receive an array of snapshots, one per detected user, at the configured interval. When the crop is not square, the 128×128 image may contain transparent letterbox/pillarbox areas.
 
 - **callback**: `(faces: FaceSnapshot[]) => void`
   - Each **FaceSnapshot** has: `userIndex` (matches `UserFrame.index`), `imageData` (128×128 RGBA), and `dataURL` (e.g. for `<img src="...">`).

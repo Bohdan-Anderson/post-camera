@@ -84,16 +84,22 @@ export function processFaces(
     const box = getFaceBox(pose, w, h)
     if (!box) continue
     faceCtx.clearRect(0, 0, FACE_SIZE, FACE_SIZE)
+    // Preserve aspect ratio: scale so the crop fills FACE_SIZE (longer side = FACE_SIZE), center and clip; small crops upscale to 128px.
+    const scale = Math.max(FACE_SIZE / box.width, FACE_SIZE / box.height)
+    const dWidth = box.width * scale
+    const dHeight = box.height * scale
+    const dx = (FACE_SIZE - dWidth) / 2
+    const dy = (FACE_SIZE - dHeight) / 2
     faceCtx.drawImage(
       sourceCanvas,
       box.x,
       box.y,
       box.width,
       box.height,
-      0,
-      0,
-      FACE_SIZE,
-      FACE_SIZE,
+      dx,
+      dy,
+      dWidth,
+      dHeight,
     )
     const imageData = faceCtx.getImageData(0, 0, FACE_SIZE, FACE_SIZE)
     let dataURL = ''
