@@ -7,6 +7,8 @@ export type {
   UserFrame,
   InitOptions,
   StartOptions,
+  FaceSnapshotOptions,
+  FaceSnapshot,
   PoseCameraUtils,
   RelativeShoulderResult,
   RelativeKeypoint,

@@ -28,8 +28,10 @@ camera.onStatusChange((status) => {
   console.log('status', status.cameraReady, status.tracking, status.modelStatus)
 })
 
-// Init model (loads worker + TF), then start
-await camera.init()
+// Optional: enable face snapshots (128×128 crops every few seconds)
+await camera.init({
+  faceSnapshots: { enabled: true, intervalMs: 2000 },
+})
 const cameras = await camera.getAvailableCameras()
 if (cameras.length) {
   await camera.selectCamera(cameras[0].deviceId)
@@ -60,7 +62,9 @@ Or configure your bundler to expose the worker (e.g. Vite’s `?worker` or copyi
 - **status**: `{ cameraReady, tracking, trackedUserCount, modelStatus, mediaPermission, error }`
 - **setVideoElement(element)**: Set the `<video>` that shows the camera feed.
 - **onFrame(cb)**, **onStatusChange(cb)**: Subscribe; return unsubscribe.
-- **init(options?)**: Load model (worker). Options: `maxPoses`, `workerUrl`.
+- **onFaceUpdate(cb)**: Subscribe to face snapshots (when `faceSnapshots.enabled`). Callback receives `FaceSnapshot[]` (128×128 face crops); return unsubscribe.
+- **setFaceSnapshotOptions(options)**: Enable/disable face snapshots at runtime; options: `{ enabled, intervalMs? }`.
+- **init(options?)**: Load model (worker). Options: `maxPoses`, `workerUrl`, `faceSnapshots` (`{ enabled, intervalMs? }`).
 - **getAvailableCameras()**: List video input devices.
 - **selectCamera(deviceId, constraints?)**: Start stream and attach to video element.
 - **startTracking()** / **stopTracking()**: Start or stop the detection loop.
@@ -77,7 +81,7 @@ Or configure your bundler to expose the worker (e.g. Vite’s `?worker` or copyi
 
 ## Types
 
-TypeScript types are exported: `PoseCameraAPI`, `Status`, `FrameOptions`, `UserFrame`, `InitOptions`, `StartOptions`, `Pose` (from pose-detection).
+TypeScript types are exported: `PoseCameraAPI`, `Status`, `FrameOptions`, `UserFrame`, `InitOptions`, `StartOptions`, `FaceSnapshotOptions`, `FaceSnapshot`, `Pose` (from pose-detection).
 
 ## Global
 

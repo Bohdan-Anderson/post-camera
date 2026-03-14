@@ -18,12 +18,36 @@ export interface UserFrame {
 }
 
 /**
+ * Options for face snapshots (crop from video using pose keypoints, resized to 128×128).
+ */
+export interface FaceSnapshotOptions {
+  /** Enable periodic face snapshots. Default false. */
+  enabled: boolean
+  /** Interval between snapshots in milliseconds. Default 2000. */
+  intervalMs?: number
+}
+
+/**
+ * A single face snapshot: 128×128 image for one detected user.
+ */
+export interface FaceSnapshot {
+  /** Index of the user in the current frame (matches UserFrame.index). */
+  userIndex: number
+  /** 128×128 RGBA image data. */
+  imageData: ImageData
+  /** Data URL suitable for `<img src="...">` (e.g. image/png). */
+  dataURL: string
+}
+
+/**
  * Options for init() – model and worker.
  */
 export interface InitOptions {
   maxPoses?: number
   /** URL to the worker script. If not set, uses default relative to main script. */
   workerUrl?: string
+  /** Enable and configure face snapshots from the video feed. */
+  faceSnapshots?: FaceSnapshotOptions
 }
 
 /**
@@ -41,6 +65,10 @@ export interface PoseCameraAPI {
   get status(): Status
   setVideoElement(element: HTMLVideoElement | null): void
   onFrame(cb: (users: UserFrame[], options: FrameOptions) => void): () => void
+  /** Subscribe to live face snapshots (when faceSnapshots.enabled). Unsubscribe by calling the returned function. */
+  onFaceUpdate(cb: (faces: FaceSnapshot[]) => void): () => void
+  /** Enable or disable face snapshots at runtime; optionally set intervalMs. */
+  setFaceSnapshotOptions(options: FaceSnapshotOptions): void
   onStatusChange(cb: (status: Status) => void): () => void
   init(options?: InitOptions): Promise<void>
   getAvailableCameras(): Promise<MediaDeviceInfo[]>

@@ -9,6 +9,7 @@ import {
   getVideoElement,
 } from './camera/index.js'
 import * as detector from './detector/index.js'
+import * as face from './face/index.js'
 import { createUtils } from './utils/index.js'
 import { getMediaPermission } from './camera/index.js'
 
@@ -25,10 +26,17 @@ export function createPoseCamera(): PoseCameraAPI {
     onFrame(cb) {
       return detector.addFrameCallback(cb)
     },
+    onFaceUpdate(cb) {
+      return face.addFaceCallback(cb)
+    },
+    setFaceSnapshotOptions(opts) {
+      face.setFaceOptions(opts)
+    },
     onStatusChange(cb) {
       return subscribe(cb)
     },
     async init(options?: InitOptions) {
+      face.setFaceOptions(options?.faceSnapshots)
       await detector.init(options)
     },
     async getAvailableCameras() {

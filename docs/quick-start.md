@@ -52,7 +52,26 @@ await camera.init({
 
 See [Vite setup](./vite-setup.md) for a full example.
 
-## 5. One-shot convenience
+## 5. Face snapshots (optional)
+
+To get periodic 128×128 face crops from the video (derived from pose keypoints), enable face snapshots and subscribe:
+
+```js
+await camera.init({
+  workerUrl: new URL('pose-camera/dist/pose-camera-worker.js', import.meta.url).href,
+  faceSnapshots: { enabled: true, intervalMs: 2000 },
+})
+const unsub = camera.onFaceUpdate((faces) => {
+  faces.forEach((face) => {
+    document.getElementById('face-img').src = face.dataURL  // 128×128 face crop
+  })
+})
+// Toggle off anytime: camera.setFaceSnapshotOptions({ enabled: false })
+```
+
+See [API reference](./api.md#onfaceupdatecallback) for details.
+
+## 6. One-shot convenience
 
 To init, pick a camera, and start tracking in one call:
 
@@ -62,7 +81,7 @@ await camera.start()
 
 You still need to call `setVideoElement` before `start()` if you want the preview on a specific `<video>`.
 
-## Cleanup
+## 7. Cleanup
 
 When leaving the page or tearing down:
 

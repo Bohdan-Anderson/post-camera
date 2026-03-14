@@ -28,7 +28,8 @@
     "typescript": "~5.9.0"
   },
   "scripts": {
-    "build": "tsup",
-    "type-check": "tsc --noEmit"
+    "build": "npx tsup",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   }
 }

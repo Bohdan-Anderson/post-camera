@@ -12,6 +12,8 @@ import type {
   UserFrame,
   InitOptions,
   StartOptions,
+  FaceSnapshotOptions,
+  FaceSnapshot,
   PoseCameraUtils,
   RelativeShoulderResult,
   RelativeKeypoint,
@@ -79,12 +81,42 @@ Keypoint names (indices): nose, left_eye, right_eye, left_ear, right_ear, left_s
 
 ```ts
 interface InitOptions {
-  maxPoses?: number   // default 1
-  workerUrl?: string  // URL of pose-camera-worker.js (required in most bundler setups)
+  maxPoses?: number           // default 1
+  workerUrl?: string           // URL of pose-camera-worker.js (required in most bundler setups)
+  faceSnapshots?: FaceSnapshotOptions  // enable face snapshots (128×128 crops at interval)
 }
 ```
 
 Passed to `init(options)` and to `start(options)`.
+
+---
+
+## FaceSnapshotOptions
+
+Options for the optional face snapshot feature (crops derived from pose keypoints, resized to 128×128).
+
+```ts
+interface FaceSnapshotOptions {
+  enabled: boolean      // enable periodic face snapshots (default false)
+  intervalMs?: number   // milliseconds between snapshot batches (default 2000)
+}
+```
+
+Use in `init({ faceSnapshots: { enabled: true, intervalMs: 2000 } })` or `setFaceSnapshotOptions({ enabled: true })`.
+
+---
+
+## FaceSnapshot
+
+One face snapshot delivered to `onFaceUpdate` callbacks.
+
+```ts
+interface FaceSnapshot {
+  userIndex: number   // matches UserFrame.index for that user
+  imageData: ImageData  // 128×128 RGBA
+  dataURL: string       // e.g. image/png data URL for <img src="...">
+}
+```
 
 ---
 

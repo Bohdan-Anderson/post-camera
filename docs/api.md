@@ -54,6 +54,46 @@ const unsubscribe = camera.onFrame((users, options) => {
 
 ---
 
+### onFaceUpdate(callback)
+
+Subscribe to live face snapshots. Only emits when **face snapshots are enabled** (via `init({ faceSnapshots: { enabled: true } })` or `setFaceSnapshotOptions({ enabled: true })`). Returns an unsubscribe function.
+
+Faces are derived from pose keypoints (nose, eyes, ears): the library crops that region from the video frame and resizes it to **128×128**. You receive an array of snapshots, one per detected user, at the configured interval.
+
+- **callback**: `(faces: FaceSnapshot[]) => void`
+  - Each **FaceSnapshot** has: `userIndex` (matches `UserFrame.index`), `imageData` (128×128 RGBA), and `dataURL` (e.g. for `<img src="...">`).
+
+```ts
+const unsub = camera.onFaceUpdate((faces) => {
+  faces.forEach((face) => {
+    console.log('User', face.userIndex)
+    imgElement.src = face.dataURL  // display 128×128 face crop
+  })
+})
+// Toggle on (e.g. at init or later):
+camera.setFaceSnapshotOptions({ enabled: true, intervalMs: 2000 })
+// Toggle off:
+camera.setFaceSnapshotOptions({ enabled: false })
+unsub()
+```
+
+---
+
+### setFaceSnapshotOptions(options)
+
+Enable or disable face snapshots at runtime and optionally set the interval. No need to call `init()` again.
+
+- **options**: `FaceSnapshotOptions`
+  - **enabled**: `boolean` — turn face snapshots on or off.
+  - **intervalMs**: `number` (optional) — milliseconds between snapshot batches (default `2000`).
+
+```ts
+camera.setFaceSnapshotOptions({ enabled: true, intervalMs: 3000 })
+camera.setFaceSnapshotOptions({ enabled: false })
+```
+
+---
+
 ### onStatusChange(callback)
 
 Subscribe to status updates. Returns an unsubscribe function.
@@ -75,9 +115,16 @@ Loads the worker and the pose model. Must be called before `startTracking()`.
 - **options** (optional):
   - **maxPoses**: `number` — max poses to detect (default `1`).
   - **workerUrl**: `string` — URL of the worker script. Required in most bundler setups.
+  - **faceSnapshots**: `FaceSnapshotOptions` — enable face snapshots and set interval.
+    - **enabled**: `boolean` — enable periodic 128×128 face crops (default `false`).
+    - **intervalMs**: `number` (optional) — milliseconds between snapshot batches (default `2000`).
 
 ```ts
-await camera.init({ maxPoses: 2, workerUrl: '/pose-camera-worker.js' })
+await camera.init({
+  maxPoses: 2,
+  workerUrl: '/pose-camera-worker.js',
+  faceSnapshots: { enabled: true, intervalMs: 2000 },
+})
 ```
 
 ---

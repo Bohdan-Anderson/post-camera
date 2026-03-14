@@ -1,5 +1,6 @@
 import { getStatus, setStatus } from '../state/store.js'
 import { getVideoElement } from '../camera/element.js'
+import { processFaces } from '../face/snapshots.js'
 import type { UserFrame } from '../types/api.js'
 
 const frameCallbacks: ((users: UserFrame[], options: { width: number; height: number }) => void)[] = []
@@ -43,6 +44,7 @@ export function createWorker(workerUrl: string, maxPoses?: number): Promise<void
           )
           setStatus({ trackedUserCount: users.length, tracking: true })
           frameCallbacks.forEach((cb) => cb(users, { width: d.width!, height: d.height! }))
+          processFaces(users, d.width, d.height)
         }
       }
       worker.onerror = () => {
