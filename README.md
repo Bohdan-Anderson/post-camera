@@ -64,7 +64,7 @@ Or configure your bundler to expose the worker (e.g. Vite’s `?worker` or copyi
 - **onFrame(cb)**, **onStatusChange(cb)**: Subscribe; return unsubscribe.
 - **onFaceUpdate(cb)**: Subscribe to face snapshots (when `faceSnapshots.enabled`). Callback receives `FaceSnapshot[]` (128×128 face crops); return unsubscribe.
 - **setFaceSnapshotOptions(options)**: Enable/disable face snapshots at runtime; options: `{ enabled, intervalMs? }`.
-- **init(options?)**: Load model (worker). Options: `maxPoses`, `workerUrl`, `faceSnapshots` (`{ enabled, intervalMs? }`).
+- **init(options?)**: Load model (worker). Options: `maxPoses`, `workerUrl`, `faceSnapshots` (`{ enabled, intervalMs? }`), `enableSmoothing` (default `false`), `modelType` (`'lite'` | `'full'`, default `'lite'`).
 - **getAvailableCameras()**: List video input devices.
 - **selectCamera(deviceId, constraints?)**: Start stream and attach to video element.
 - **startTracking()** / **stopTracking()**: Start or stop the detection loop.
@@ -81,7 +81,7 @@ Or configure your bundler to expose the worker (e.g. Vite’s `?worker` or copyi
 
 ## Types
 
-TypeScript types are exported: `PoseCameraAPI`, `Status`, `FrameOptions`, `UserFrame`, `InitOptions`, `StartOptions`, `FaceSnapshotOptions`, `FaceSnapshot`, `Pose` (from pose-detection).
+TypeScript types are exported: `PoseCameraAPI`, `Status`, `FrameOptions`, `UserFrame`, `InitOptions`, `StartOptions`, `FaceSnapshotOptions`, `FaceSnapshot`, `Pose` (from pose-detection), `DetectorModelType`.
 
 ## Global
 

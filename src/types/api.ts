@@ -40,6 +40,11 @@ export interface FaceSnapshot {
 }
 
 /**
+ * MoveNet model variant: lite (faster) or full (more accurate).
+ */
+export type DetectorModelType = 'lite' | 'full'
+
+/**
  * Options for init() – model and worker.
  */
 export interface InitOptions {
@@ -48,6 +53,10 @@ export interface InitOptions {
   workerUrl?: string
   /** Enable and configure face snapshots from the video feed. */
   faceSnapshots?: FaceSnapshotOptions
+  /** Enable landmark smoothing (adds some lag for stability). Default false. */
+  enableSmoothing?: boolean
+  /** MoveNet model: 'lite' (faster) or 'full' (more accurate). Default 'lite'. */
+  modelType?: DetectorModelType
 }
 
 /**

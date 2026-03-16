@@ -6,5 +6,5 @@ export type WorkerOutMessage =
   | { type: 'poses'; poses: Pose[]; width: number; height: number }
 
 export type MainToWorkerMessage =
-  | { type: 'init'; maxPoses?: number }
+  | { type: 'init'; maxPoses?: number; enableSmoothing?: boolean; modelType?: 'lite' | 'full' }
   | { type: 'frame'; imageData: ImageData; width: number; height: number }

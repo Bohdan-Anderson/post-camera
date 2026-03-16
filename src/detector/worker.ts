@@ -6,7 +6,12 @@ import '@tensorflow/tfjs-backend-webgl'
 import * as tf from '@tensorflow/tfjs-core'
 import * as poseDetection from '@tensorflow-models/pose-detection'
 
-type WorkerInitMessage = { type: 'init'; maxPoses?: number }
+type WorkerInitMessage = {
+  type: 'init'
+  maxPoses?: number
+  enableSmoothing?: boolean
+  modelType?: 'lite' | 'full'
+}
 type WorkerFrameMessage = {
   type: 'frame'
   imageData: ImageData
@@ -17,15 +22,19 @@ type WorkerMessage = WorkerInitMessage | WorkerFrameMessage
 
 let detector: poseDetection.PoseDetector | null = null
 let maxPoses = 1
+let enableSmoothing = false
+let modelTypeOption: 'lite' | 'full' = 'lite'
 
 async function loadModel(): Promise<void> {
   if (detector) return
   await tf.setBackend('webgl')
   const modelType: poseDetection.MoveNetModelConfig['modelType'] =
-    poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+    modelTypeOption === 'full'
+      ? poseDetection.movenet.modelType.SINGLEPOSE_THUNDER
+      : poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
   detector = await poseDetection.createDetector(
     poseDetection.SupportedModels.MoveNet,
-    { modelType, enableSmoothing: true, enableTracking: true },
+    { modelType, enableSmoothing, enableTracking: true },
   )
 }
 
@@ -47,6 +56,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   if (msg.type === 'init') {
     try {
       maxPoses = msg.maxPoses ?? 1
+      enableSmoothing = msg.enableSmoothing ?? false
+      modelTypeOption = msg.modelType ?? 'lite'
       await loadModel()
       self.postMessage({ type: 'ready' })
     } catch (err) {

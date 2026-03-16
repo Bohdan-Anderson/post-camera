@@ -18,6 +18,7 @@ import type {
   RelativeShoulderResult,
   RelativeKeypoint,
   Pose,
+  DetectorModelType,
 } from 'pose-camera'
 ```
 
@@ -84,10 +85,14 @@ interface InitOptions {
   maxPoses?: number           // default 1
   workerUrl?: string           // URL of pose-camera-worker.js (required in most bundler setups)
   faceSnapshots?: FaceSnapshotOptions  // enable face snapshots (128×128 crops at interval)
+  enableSmoothing?: boolean   // landmark smoothing (adds some lag; default false)
+  modelType?: DetectorModelType  // 'lite' (faster) or 'full' (more accurate); default 'lite'
 }
 ```
 
 Passed to `init(options)` and to `start(options)`.
+
+**DetectorModelType**: `'lite' | 'full'` — MoveNet variant. Use `DetectorModelType` when typing `modelType`.
 
 ---
 

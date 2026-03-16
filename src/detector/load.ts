@@ -23,7 +23,11 @@ export async function loadModel(options?: InitOptions): Promise<void> {
     throw new Error(msg)
   }
   try {
-    await createWorker(url, options?.maxPoses ?? 1)
+    await createWorker(url, {
+      maxPoses: options?.maxPoses ?? 1,
+      enableSmoothing: options?.enableSmoothing ?? false,
+      modelType: options?.modelType ?? 'lite',
+    })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Failed to load model'
     setStatus({ modelStatus: 'error', error: msg })

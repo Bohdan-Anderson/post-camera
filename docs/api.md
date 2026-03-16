@@ -118,12 +118,16 @@ Loads the worker and the pose model. Must be called before `startTracking()`.
   - **faceSnapshots**: `FaceSnapshotOptions` — enable face snapshots and set interval.
     - **enabled**: `boolean` — enable periodic 128×128 face crops (default `false`).
     - **intervalMs**: `number` (optional) — milliseconds between snapshot batches (default `2000`).
+  - **enableSmoothing**: `boolean` — enable landmark smoothing for stability (adds some lag). Default `false`.
+  - **modelType**: `'lite' | 'full'` — MoveNet model: `'lite'` (faster, default) or `'full'` (more accurate).
 
 ```ts
 await camera.init({
   maxPoses: 2,
   workerUrl: '/pose-camera-worker.js',
   faceSnapshots: { enabled: true, intervalMs: 2000 },
+  enableSmoothing: false,
+  modelType: 'lite',
 })
 ```
 

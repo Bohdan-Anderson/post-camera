@@ -13,6 +13,7 @@ export type {
   RelativeShoulderResult,
   RelativeKeypoint,
   Pose,
+  DetectorModelType,
 } from './types/api.js'
 
 declare global {

@@ -22,7 +22,16 @@ export function addFrameCallback(cb: (users: UserFrame[], options: { width: numb
   }
 }
 
-export function createWorker(workerUrl: string, maxPoses?: number): Promise<void> {
+/**
+ * Payload sent to the worker on init. Defaults are applied by the caller (load.ts).
+ */
+export interface WorkerInitPayload {
+  maxPoses: number
+  enableSmoothing: boolean
+  modelType: 'lite' | 'full'
+}
+
+export function createWorker(workerUrl: string, initPayload: WorkerInitPayload): Promise<void> {
   return new Promise((resolve, reject) => {
     if (worker) {
       resolve()
@@ -51,7 +60,12 @@ export function createWorker(workerUrl: string, maxPoses?: number): Promise<void
         setStatus({ modelStatus: 'error', error: 'Worker failed to load' })
         reject(new Error('Worker failed to load'))
       }
-      worker.postMessage({ type: 'init', maxPoses })
+      worker.postMessage({
+        type: 'init',
+        maxPoses: initPayload.maxPoses,
+        enableSmoothing: initPayload.enableSmoothing,
+        modelType: initPayload.modelType,
+      })
     } catch (err) {
       reject(err)
     }
