@@ -45,7 +45,7 @@ await camera.start()
 ## How it works
 
 - **Main thread**: Camera, video element, your callbacks (`onFrame`, `onStatusChange`), and frame capture. No TensorFlow on the main thread.
-- **Web Worker**: TensorFlow and the pose model run in a dedicated worker. Frames are sent as `ImageData`; poses are posted back. The **API you use is the same** – no worker-specific code.
+- **Web Worker**: TensorFlow and the pose model run in a dedicated worker. Frames are sent as RGB data; poses are posted back. The **API you use is the same** – no worker-specific code.
 
 The worker script is loaded from `pose-camera-worker.js` next to the main script. With a **bundler** (Vite, Webpack, etc.), you may need to pass the worker URL so it resolves correctly:
 
