@@ -7,4 +7,4 @@ export type WorkerOutMessage =
 
 export type MainToWorkerMessage =
   | { type: 'init'; maxPoses?: number; enableSmoothing?: boolean; modelType?: 'lite' | 'full' }
-  | { type: 'frame'; imageData: ImageData; width: number; height: number }
+  | { type: 'frame'; rgb: Uint8Array; width: number; height: number }

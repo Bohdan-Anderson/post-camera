@@ -3,11 +3,20 @@ import { getVideoElement } from '../camera/element.js'
 import { processFaces } from '../face/snapshots.js'
 import type { UserFrame } from '../types/api.js'
 
+const SKIP_THRESHOLD = 4
+const RECOVERY_SENDS = 16
+
 const frameCallbacks: ((users: UserFrame[], options: { width: number; height: number }) => void)[] = []
 let worker: Worker | null = null
 let rafId: number | null = null
 let captureCanvas: HTMLCanvasElement | null = null
 let captureCtx: CanvasRenderingContext2D | null = null
+
+let workerBusy = false
+let consecutiveSkips = 0
+let halfFramerateMode = false
+let tickCount = 0
+let sendsWithoutSkip = 0
 
 export function setFrameCallbacks(cbs: typeof frameCallbacks): void {
   frameCallbacks.length = 0
@@ -48,6 +57,7 @@ export function createWorker(workerUrl: string, initPayload: WorkerInitPayload):
           setStatus({ modelStatus: 'error', error: d.message ?? 'Worker error' })
           reject(new Error(d.message))
         } else if (d.type === 'poses' && d.poses && d.width != null && d.height != null) {
+          workerBusy = false
           const users: UserFrame[] = (d.poses as import('@tensorflow-models/pose-detection').Pose[]).map(
             (pose, index) => ({ pose, index }),
           )
@@ -73,8 +83,17 @@ export function createWorker(workerUrl: string, initPayload: WorkerInitPayload):
 }
 
 export function captureAndPostFrame(): void {
+  if (!worker) return
+  if (workerBusy) {
+    consecutiveSkips++
+    if (consecutiveSkips >= SKIP_THRESHOLD) {
+      halfFramerateMode = true
+      sendsWithoutSkip = 0
+    }
+    return
+  }
   const video = getVideoElement()
-  if (!video || video.readyState < 2 || !worker) return
+  if (!video || video.readyState < 2) return
   const w = video.videoWidth
   const h = video.videoHeight
   if (w === 0 || h === 0) return
@@ -87,17 +106,46 @@ export function captureAndPostFrame(): void {
   captureCanvas.height = h
   captureCtx.drawImage(video, 0, 0)
   const imageData = captureCtx.getImageData(0, 0, w, h)
-  worker.postMessage({ type: 'frame', imageData, width: w, height: h })
+  const data = imageData.data
+  const len = w * h
+  const rgb = new Uint8Array(len * 3)
+  for (let i = 0; i < len; i++) {
+    const i4 = i * 4
+    const i3 = i * 3
+    rgb[i3] = data[i4]
+    rgb[i3 + 1] = data[i4 + 1]
+    rgb[i3 + 2] = data[i4 + 2]
+  }
+  consecutiveSkips = 0
+  if (halfFramerateMode) {
+    sendsWithoutSkip++
+    if (sendsWithoutSkip >= RECOVERY_SENDS) {
+      halfFramerateMode = false
+      sendsWithoutSkip = 0
+    }
+  }
+  workerBusy = true
+  worker.postMessage({ type: 'frame', rgb, width: w, height: h }, [rgb.buffer])
 }
 
 export function startLoop(): void {
   if (rafId != null) return
   function tick(): void {
     rafId = requestAnimationFrame(tick)
+    tickCount++
+    if (halfFramerateMode && tickCount % 2 !== 0) return
     captureAndPostFrame()
   }
   rafId = requestAnimationFrame(tick)
   setStatus({ tracking: true })
+}
+
+function resetLoopState(): void {
+  workerBusy = false
+  consecutiveSkips = 0
+  halfFramerateMode = false
+  tickCount = 0
+  sendsWithoutSkip = 0
 }
 
 export function stopLoop(): void {
@@ -105,6 +153,7 @@ export function stopLoop(): void {
     cancelAnimationFrame(rafId)
     rafId = null
   }
+  resetLoopState()
   setStatus({ tracking: false, trackedUserCount: 0 })
 }
 

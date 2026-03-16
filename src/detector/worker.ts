@@ -14,7 +14,7 @@ type WorkerInitMessage = {
 }
 type WorkerFrameMessage = {
   type: 'frame'
-  imageData: ImageData
+  rgb: Uint8Array
   width: number
   height: number
 }
@@ -38,13 +38,20 @@ async function loadModel(): Promise<void> {
   )
 }
 
-async function handleFrame(imageData: ImageData, width: number, height: number): Promise<void> {
+async function handleFrame(rgb: Uint8Array, width: number, height: number): Promise<void> {
   if (!detector) return
-  const canvas = new OffscreenCanvas(width, height)
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-  ctx.putImageData(imageData, 0, 0)
-  const poses = await detector.estimatePoses(canvas as unknown as HTMLVideoElement, {
+  const imageData = new ImageData(width, height)
+  const data = imageData.data
+  const len = width * height
+  for (let i = 0; i < len; i++) {
+    const i4 = i * 4
+    const i3 = i * 3
+    data[i4] = rgb[i3]
+    data[i4 + 1] = rgb[i3 + 1]
+    data[i4 + 2] = rgb[i3 + 2]
+    data[i4 + 3] = 255
+  }
+  const poses = await detector.estimatePoses(imageData, {
     flipHorizontal: false,
     maxPoses,
   })
@@ -69,6 +76,6 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     return
   }
   if (msg.type === 'frame') {
-    await handleFrame(msg.imageData, msg.width, msg.height)
+    await handleFrame(msg.rgb, msg.width, msg.height)
   }
 }

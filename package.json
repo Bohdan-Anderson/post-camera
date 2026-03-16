@@ -1,6 +1,6 @@
 {
   "name": "pose-camera",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Plug-and-play camera and pose detection with Web Worker-based tracking",
   "type": "module",
   "main": "./dist/index.cjs",
